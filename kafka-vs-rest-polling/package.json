@@ -1,0 +1,28 @@
+{
+  "name": "uber-kafka-vs-rest-poc",
+  "version": "1.0.0",
+  "description": "A high-fidelity architectural simulation of Uber's tracking engine.",
+  "main": "index.js",
+  "scripts": {
+    "start:rest": "node rest-polling-service/server.js",
+    "start:kafka": "node kafka-pubsub-service/server.js",
+    "start:consumer": "node kafka-pubsub-service/consumer.js",
+    "experiment": "node k6/runner.js",
+    "experiment:legacy": "node k6/runner-legacy.js",
+    "generate-visuals": "node scripts/generate-visuals.js",
+    "full-demo": "npm run experiment && npm run generate-visuals"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "boxen": "^5.1.2",
+    "chalk": "^4.1.2",
+    "cli-progress": "^3.12.0",
+    "cli-table3": "^0.6.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "kafkajs": "^2.2.4",
+    "ora": "^5.4.1",
+    "pg": "^8.11.3",
+    "prom-client": "^15.1.3"
+  }
+}
