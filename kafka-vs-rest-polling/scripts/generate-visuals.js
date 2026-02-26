@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * LinkedIn Visual Generator
- * Creates stunning graphics (not boring terminals!) for your content
- * Outputs PNG images using HTML Canvas or SVG
+ * Visual Generator
+ * Creates professional SVG diagrams from experiment results
  */
 
 const fs = require('fs');
@@ -33,6 +32,22 @@ class VisualGenerator {
   generateComparisonSVG() {
     const { rest, kafka } = this.data;
 
+    const restData = {
+      totalRequests: rest.totalRequests || 0,
+      successCount: (rest.totalRequests || 0) - (rest.errorCount || 0),
+      errorCount: rest.errorCount || 0,
+      errorRate: rest.errorRate || '0.00',
+      latency: rest.latency || { avg: '0', p95: '0' }
+    };
+
+    const kafkaData = {
+      totalRequests: kafka.totalRequests || 0,
+      successCount: (kafka.totalRequests || 0) - (kafka.errorCount || 0),
+      errorCount: kafka.errorCount || 0,
+      errorRate: kafka.errorRate || '0.00',
+      latency: kafka.latency || { avg: '0', p95: '0' }
+    };
+
     const svg = `
 <svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
@@ -57,7 +72,7 @@ class VisualGenerator {
   </text>
   <text x="500" y="240" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.text}" text-anchor="end">
-    ${rest.totalRequests.toLocaleString()}
+    ${restData.totalRequests.toLocaleString()}
   </text>
 
   <text x="150" y="290" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.success}">
@@ -65,7 +80,7 @@ class VisualGenerator {
   </text>
   <text x="500" y="290" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.success}" text-anchor="end">
-    ${rest.successCount.toLocaleString()}
+    ${restData.successCount.toLocaleString()}
   </text>
 
   <text x="150" y="340" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.error}">
@@ -73,7 +88,7 @@ class VisualGenerator {
   </text>
   <text x="500" y="340" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.error}" text-anchor="end">
-    ${rest.errorCount.toLocaleString()}
+    ${restData.errorCount.toLocaleString()}
   </text>
 
   <text x="150" y="390" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.error}">
@@ -81,7 +96,7 @@ class VisualGenerator {
   </text>
   <text x="500" y="390" font-family="Arial, sans-serif" font-size="32" font-weight="bold"
         fill="${COLORS.error}" text-anchor="end">
-    ${rest.errorRate}%
+    ${restData.errorRate}%
   </text>
 
   <text x="150" y="460" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.text}">
@@ -89,7 +104,7 @@ class VisualGenerator {
   </text>
   <text x="500" y="460" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.text}" text-anchor="end">
-    ${rest.latency.avg}ms
+    ${restData.latency.avg}ms
   </text>
 
   <!-- REST Business Impact -->
@@ -100,15 +115,15 @@ class VisualGenerator {
   </text>
   <text x="325" y="600" font-family="Arial, sans-serif" font-size="16"
         fill="${COLORS.text}" text-anchor="middle">
-    Lost Revenue: $${((rest.errorCount * 0.05 * 25) / 1000).toFixed(1)}K
+    Lost Revenue: $${((restData.errorCount * 0.05 * 25) / 1000).toFixed(1)}K
   </text>
   <text x="325" y="635" font-family="Arial, sans-serif" font-size="16"
         fill="${COLORS.text}" text-anchor="middle">
-    Affected Users: ${Math.floor(rest.errorCount / 3).toLocaleString()}
+    Affected Users: ${Math.floor(restData.errorCount / 3).toLocaleString()}
   </text>
   <text x="325" y="670" font-family="Arial, sans-serif" font-size="16"
         fill="${COLORS.error}" text-anchor="middle">
-    😡 Customer Impact: HIGH
+    Customer Impact: HIGH
   </text>
 
   <!-- Kafka Column -->
@@ -124,7 +139,7 @@ class VisualGenerator {
   </text>
   <text x="1050" y="240" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.text}" text-anchor="end">
-    ${kafka.totalRequests.toLocaleString()}
+    ${kafkaData.totalRequests.toLocaleString()}
   </text>
 
   <text x="700" y="290" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.success}">
@@ -132,7 +147,7 @@ class VisualGenerator {
   </text>
   <text x="1050" y="290" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.success}" text-anchor="end">
-    ${kafka.successCount.toLocaleString()}
+    ${kafkaData.successCount.toLocaleString()}
   </text>
 
   <text x="700" y="340" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.error}">
@@ -140,7 +155,7 @@ class VisualGenerator {
   </text>
   <text x="1050" y="340" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.error}" text-anchor="end">
-    ${kafka.errorCount.toLocaleString()}
+    ${kafkaData.errorCount.toLocaleString()}
   </text>
 
   <text x="700" y="390" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.success}">
@@ -148,7 +163,7 @@ class VisualGenerator {
   </text>
   <text x="1050" y="390" font-family="Arial, sans-serif" font-size="32" font-weight="bold"
         fill="${COLORS.success}" text-anchor="end">
-    ${kafka.errorRate}%
+    ${kafkaData.errorRate}%
   </text>
 
   <text x="700" y="460" font-family="Arial, sans-serif" font-size="20" fill="${COLORS.text}">
@@ -156,7 +171,7 @@ class VisualGenerator {
   </text>
   <text x="1050" y="460" font-family="Arial, sans-serif" font-size="20" font-weight="bold"
         fill="${COLORS.text}" text-anchor="end">
-    ${kafka.latency.avg}ms
+    ${kafkaData.latency.avg}ms
   </text>
 
   <!-- Kafka Business Impact -->
@@ -167,125 +182,27 @@ class VisualGenerator {
   </text>
   <text x="875" y="600" font-family="Arial, sans-serif" font-size="16"
         fill="${COLORS.text}" text-anchor="middle">
-    Lost Revenue: $${((kafka.errorCount * 0.05 * 25) / 1000).toFixed(1)}K
+    Lost Revenue: $${((kafkaData.errorCount * 0.05 * 25) / 1000).toFixed(1)}K
   </text>
   <text x="875" y="635" font-family="Arial, sans-serif" font-size="16"
         fill="${COLORS.text}" text-anchor="middle">
-    Affected Users: ${Math.floor(kafka.errorCount / 3).toLocaleString()}
+    Affected Users: ${Math.floor(kafkaData.errorCount / 3).toLocaleString()}
   </text>
   <text x="875" y="670" font-family="Arial, sans-serif" font-size="16"
         fill="${COLORS.success}" text-anchor="middle">
-    😊 Customer Impact: NONE
+    Customer Impact: NONE
   </text>
 
   <!-- Footer -->
   <text x="600" y="780" font-family="Arial, sans-serif" font-size="14"
         fill="${COLORS.text}" text-anchor="middle" opacity="0.7">
-    Database crashed for 2 hours • Same scenario, different architectures
+    Database crashed for 2 minutes • Same scenario, different architectures
   </text>
 </svg>`;
 
     const filename = path.join(this.outputDir, 'comparison.svg');
     fs.writeFileSync(filename, svg);
     console.log(`✅ Comparison graphic saved: ${filename}`);
-    return filename;
-  }
-
-  generateTimelineSVG() {
-    const { timeline, events } = this.data;
-    const width = 1200;
-    const height = 600;
-    const padding = { top: 80, right: 50, bottom: 60, left: 80 };
-    const chartWidth = width - padding.left - padding.right;
-    const chartHeight = height - padding.top - padding.bottom;
-
-    // Find max values for scaling
-    const maxTime = Math.max(
-      ...timeline.rest.map(p => p.timestamp),
-      ...timeline.kafka.map(p => p.timestamp)
-    );
-    const maxErrorRate = 100;
-
-    // Scale functions
-    const scaleX = (time) => padding.left + (time / maxTime) * chartWidth;
-    const scaleY = (errorRate) => padding.top + chartHeight - (errorRate / maxErrorRate) * chartHeight;
-
-    // Generate path for REST
-    const restPath = timeline.rest.map((point, i) => {
-      const x = scaleX(point.timestamp);
-      const y = scaleY(point.errorRate);
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-    }).join(' ');
-
-    // Generate path for Kafka
-    const kafkaPath = timeline.kafka.map((point, i) => {
-      const x = scaleX(point.timestamp);
-      const y = scaleY(point.errorRate);
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-    }).join(' ');
-
-    const svg = `
-<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="${width}" height="${height}" fill="${COLORS.background}"/>
-
-  <!-- Title -->
-  <text x="${width / 2}" y="40" font-family="Arial, sans-serif" font-size="28" font-weight="bold"
-        fill="${COLORS.text}" text-anchor="middle">
-    Error Rate Timeline: Database Failure at 60s
-  </text>
-
-  <!-- Grid lines -->
-  ${[0, 25, 50, 75, 100].map(val => `
-    <line x1="${padding.left}" y1="${scaleY(val)}" x2="${width - padding.right}" y2="${scaleY(val)}"
-          stroke="#333" stroke-width="1" stroke-dasharray="5,5"/>
-    <text x="${padding.left - 10}" y="${scaleY(val) + 5}" font-family="Arial, sans-serif" font-size="12"
-          fill="${COLORS.text}" text-anchor="end">${val}%</text>
-  `).join('')}
-
-  <!-- Event markers -->
-  ${events.map(event => {
-    const x = scaleX(event.timestamp);
-    return `
-      <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${height - padding.bottom}"
-            stroke="${COLORS.error}" stroke-width="2" stroke-dasharray="10,5"/>
-      <text x="${x}" y="${padding.top - 10}" font-family="Arial, sans-serif" font-size="12"
-            fill="${COLORS.error}" text-anchor="middle">${event.event}</text>
-    `;
-  }).join('')}
-
-  <!-- REST line -->
-  <path d="${restPath}" fill="none" stroke="${COLORS.rest}" stroke-width="3"/>
-
-  <!-- Kafka line -->
-  <path d="${kafkaPath}" fill="none" stroke="${COLORS.kafka}" stroke-width="3"/>
-
-  <!-- Legend -->
-  <rect x="${width - 200}" y="100" width="150" height="80" fill="#1a1a1a" stroke="${COLORS.text}"
-        stroke-width="1" rx="5"/>
-  <line x1="${width - 180}" y1="130" x2="${width - 140}" y2="130"
-        stroke="${COLORS.rest}" stroke-width="3"/>
-  <text x="${width - 130}" y="135" font-family="Arial, sans-serif" font-size="14"
-        fill="${COLORS.rest}">REST</text>
-  <line x1="${width - 180}" y1="160" x2="${width - 140}" y2="160"
-        stroke="${COLORS.kafka}" stroke-width="3"/>
-  <text x="${width - 130}" y="165" font-family="Arial, sans-serif" font-size="14"
-        fill="${COLORS.kafka}">Kafka</text>
-
-  <!-- X-axis label -->
-  <text x="${width / 2}" y="${height - 20}" font-family="Arial, sans-serif" font-size="14"
-        fill="${COLORS.text}" text-anchor="middle">Time (seconds)</text>
-
-  <!-- Y-axis label -->
-  <text x="20" y="${height / 2}" font-family="Arial, sans-serif" font-size="14"
-        fill="${COLORS.text}" text-anchor="middle" transform="rotate(-90, 20, ${height / 2})">
-    Error Rate (%)
-  </text>
-</svg>`;
-
-    const filename = path.join(this.outputDir, 'timeline.svg');
-    fs.writeFileSync(filename, svg);
-    console.log(`✅ Timeline graphic saved: ${filename}`);
     return filename;
   }
 
@@ -426,51 +343,75 @@ class VisualGenerator {
   }
 
   generateAllVisuals() {
-    console.log('\n🎨 Generating LinkedIn-ready visuals...\n');
+    console.log('\nGenerating visuals...\n');
 
     const files = {
       comparison: this.generateComparisonSVG(),
-      timeline: this.generateTimelineSVG(),
       restArchitecture: this.generateArchitectureDiagramSVG('rest'),
       kafkaArchitecture: this.generateArchitectureDiagramSVG('kafka'),
     };
 
-    console.log('\n✅ All visuals generated successfully!');
-    console.log('\n📁 Files created:');
+    console.log('\nAll visuals generated successfully!');
+    console.log('\nFiles created:');
     Object.entries(files).forEach(([name, path]) => {
       console.log(`   ${name}: ${path}`);
     });
 
-    console.log('\n💡 To convert SVG to PNG for LinkedIn:');
-    console.log('   Use any online converter or command: convert visuals/*.svg visuals/*.png');
+    console.log('\nTo convert SVG to PNG: convert visuals/*.svg visuals/*.png');
 
     return files;
   }
 }
 
+function parseK6Summary(summaryPath) {
+  const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+  const httpReqs = summary.metrics.http_reqs || {};
+  const httpReqFailed = summary.metrics.http_req_failed || {};
+  const errors = summary.metrics.errors || {};
+  const duration = summary.metrics.http_req_duration || {};
+  const checks = summary.metrics.checks || {};
+
+  const totalRequests = httpReqs.count || 0;
+  const errorCount = Math.floor(totalRequests * (httpReqFailed.rate || errors.value || 0));
+  const errorRate = ((httpReqFailed.rate || errors.value || 0) * 100).toFixed(2);
+
+  const successfulChecks = checks.passes || 0;
+  const checkBasedErrors = totalRequests - successfulChecks;
+
+  return {
+    totalRequests,
+    errorCount: Math.max(errorCount, checkBasedErrors),
+    errorRate: Math.max(parseFloat(errorRate), ((checkBasedErrors / totalRequests) * 100)).toFixed(2),
+    latency: {
+      avg: (duration.avg || 0).toFixed(2),
+      p95: (duration['p(95)'] || 0).toFixed(2),
+    },
+  };
+}
+
 // Run if executed directly
 if (require.main === module) {
-  // Load the most recent experiment data
   const resultsDir = './experiment-results';
   if (!fs.existsSync(resultsDir)) {
-    console.error('❌ No experiment results found. Run measure-experiment.js first!');
+    console.error('No experiment results found. Run npm run experiment first!');
     process.exit(1);
   }
 
-  const files = fs.readdirSync(resultsDir)
-    .filter(f => f.endsWith('.json'))
-    .sort()
-    .reverse();
+  const restSummary = path.join(resultsDir, 'k6-rest-summary.json');
+  const kafkaSummary = path.join(resultsDir, 'k6-kafka-summary.json');
 
-  if (files.length === 0) {
-    console.error('❌ No experiment JSON files found. Run measure-experiment.js first!');
+  if (!fs.existsSync(restSummary) || !fs.existsSync(kafkaSummary)) {
+    console.error('Missing k6 summary files. Run npm run experiment first!');
     process.exit(1);
   }
 
-  const latestFile = path.join(resultsDir, files[0]);
-  console.log(`📊 Loading experiment data from: ${latestFile}`);
+  console.log('Loading experiment data from k6 summaries...');
 
-  const experimentData = JSON.parse(fs.readFileSync(latestFile, 'utf8'));
+  const experimentData = {
+    rest: parseK6Summary(restSummary),
+    kafka: parseK6Summary(kafkaSummary),
+  };
+
   const generator = new VisualGenerator(experimentData);
   generator.generateAllVisuals();
 }

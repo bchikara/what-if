@@ -389,7 +389,11 @@ export default function () {
       this.runK6Test('kafka'),
     ]);
 
-    console.log('\n');
+    if (this.progressBar) {
+      this.progressBar.stop();
+    }
+
+    console.log('\n\n');
     const parseSpinner = ora('Parsing results').start();
     this.results.rest = await this.parseResults('rest');
     this.results.kafka = await this.parseResults('kafka');
