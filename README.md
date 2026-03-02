@@ -32,7 +32,7 @@ Compares PostgreSQL, Redis, and Bloom filters for username availability checks a
 
 **Tech**: Node.js, PostgreSQL, Redis, Bloom Filters, k6, Docker
 
-[Read more →](./bloom-filter-username-check/README.md)
+[Read more →](./bloom-filter/README.md)
 
 ---
 
