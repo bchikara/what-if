@@ -1,0 +1,71 @@
+{
+  "dashboard": {
+    "title": "Bloom Filter vs Redis vs PostgreSQL - Performance Comparison",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(postgres_request_duration_seconds_bucket[1m]))",
+            "legendFormat": "PostgreSQL"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(redis_request_duration_seconds_bucket[1m]))",
+            "legendFormat": "Redis"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(bloom_request_duration_seconds_bucket[1m]))",
+            "legendFormat": "Bloom Filter"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Requests per Second",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(postgres_http_requests_total[1m])",
+            "legendFormat": "PostgreSQL"
+          },
+          {
+            "expr": "rate(redis_http_requests_total[1m])",
+            "legendFormat": "Redis"
+          },
+          {
+            "expr": "rate(bloom_http_requests_total[1m])",
+            "legendFormat": "Bloom Filter"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Database Query Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(postgres_db_queries_total[1m])",
+            "legendFormat": "PostgreSQL Direct"
+          },
+          {
+            "expr": "rate(bloom_db_fallbacks_total[1m])",
+            "legendFormat": "Bloom Filter Fallbacks"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Bloom Filter False Positive Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(bloom_false_positives_total[1m]) / rate(bloom_checks_total[1m]) * 100",
+            "legendFormat": "False Positive %"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -20,6 +20,22 @@ Demonstrates why event-driven architectures (Kafka) outperform synchronous REST 
 
 ---
 
+### 2. [Bloom Filter Username Check](./bloom-filter-username-check)
+**What if you could check 10 million usernames in under 1 millisecond?**
+
+Compares PostgreSQL, Redis, and Bloom filters for username availability checks at scale.
+
+- **PostgreSQL**: 23ms latency, 100K database queries
+- **Redis**: 2.8ms latency, 500MB memory for 10M users
+- **Bloom Filter**: 0.08ms latency, 9.6MB memory, 95% query reduction
+- Real-world use cases: GitHub, Medium, Chrome
+
+**Tech**: Node.js, PostgreSQL, Redis, Bloom Filters, k6, Docker
+
+[Read more →](./bloom-filter-username-check/README.md)
+
+---
+
 ## Contributing
 
 Each project is self-contained with its own README and setup instructions.
